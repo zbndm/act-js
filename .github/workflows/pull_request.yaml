@@ -1,0 +1,50 @@
+name: Pull Request Checks
+
+on: 
+  pull_request:
+    paths-ignore:
+      - 'LICENSE'
+      - '.gitignore'
+      - '**.md'
+      - '.github/workflows/**'
+      - 'test/ci/**'
+      - 'jest.config.ts'
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        node-version: [16.x]
+        os: [ubuntu-latest]
+      fail-fast: true
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: Install packages
+        run: npm ci
+
+      - name: Install act
+        run: npm run prebuild
+      
+      - name: Test
+        run: npm test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      
+      - name: Install packages
+        run: npm ci
+      
+      - name: lint-check
+        run: npm run lint
